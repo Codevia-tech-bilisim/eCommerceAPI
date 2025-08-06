@@ -1,3 +1,5 @@
+package com.huseyinsen.controller;
+
 import com.huseyinsen.dto.AuthenticationResponse;
 import com.huseyinsen.dto.RegisterRequest;
 import com.huseyinsen.service.AuthenticationService;
@@ -23,12 +25,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody com.example.dto.DtoLoginRequest request) {
+    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody com.huseyinsen.dto.DtoLoginRequest request) {
         return ResponseEntity.ok(authenticationService.login(request));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> refresh(HttpServletRequest request) authenticationService
+    public ResponseEntity<AuthenticationResponse> refresh(HttpServletRequest request) authenticationService{
+        return null;
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {

@@ -1,18 +1,21 @@
 package com.huseyinsen.service;
 
-import com.huseyinsen.dto.AuthenticationRequest;
 import com.huseyinsen.dto.AuthenticationResponse;
+import com.huseyinsen.dto.DtoLoginRequest;
 import com.huseyinsen.dto.RegisterRequest;
 import com.huseyinsen.entity.User;
 import com.huseyinsen.entity.UserStatus;
 import com.huseyinsen.repository.UserRepository;
 import com.huseyinsen.security.JwtService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +28,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
+    public AuthenticationResponse register(@Valid RegisterRequest request) {
+        User user = User.builder()
                 .firstName(request.getFirstname())
                 .lastName(request.getLastname())
                 .email(request.getEmail())
@@ -36,26 +39,37 @@ public class AuthenticationService {
 
         userRepository.save(user);
 
-        var jwtToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateToken(user); // refresh için farklı method yazılabilir
+
         return AuthenticationResponse.builder()
-                .accessToken(jwtToken)  // Burada değişiklik yaptık
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse login(@Valid DtoLoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        User user = userRepository.findByUsername(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        var jwtToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateToken(user); // refresh için farklı method yazılabilir
+
         return AuthenticationResponse.builder()
-                .accessToken(jwtToken)  // Burada değişiklik yaptık
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
-    public AuthenticationResponse login(com.example.dto.@Valid DtoLoginRequest request) {
+    public void logout(HttpServletRequest request) {
+        // Eğer token blacklisting yapacaksan burada gerçekleştir.
+        // Örn: Redis'e blacklist token ekleme.
     }
 }
