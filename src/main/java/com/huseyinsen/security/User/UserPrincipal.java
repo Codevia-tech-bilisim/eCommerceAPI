@@ -1,15 +1,13 @@
-package com.huseyinsen.security;
+package com.huseyinsen.security.User;
 
 import com.huseyinsen.entity.User;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
 
-@Getter
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
@@ -17,23 +15,23 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Rol sistemin yoksa şimdilik boş liste dönebiliriz.
+        // Eğer rollerin varsa burada maplersin, şu an boş liste dönüyoruz
         return Collections.emptyList();
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword(); // User entity içindeki password
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername(); // User entity içindeki username (veya email)
+        return user.getEmail(); // Login için email kullanılıyor
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // İstersen User’dan okuyabilirsin
     }
 
     @Override
@@ -48,6 +46,10 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // Eğer sisteminde aktiflik durumu varsa burada kontrol edebilirsin
+        return user.isEnabled(); // Kullanıcı aktif mi kontrolü
+    }
+
+    public User getUser() {
+        return user;
     }
 }

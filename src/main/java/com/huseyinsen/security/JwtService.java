@@ -13,16 +13,16 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "my-secret-key-which-should-be-very-secure-and-long";
+    // private static final String SECRET_KEY = "my-secret-key-which-should-be-very-secure-and-long";
 
-    private SecretKey getSigningKey() {
+    private SecretKey getSigningKey() { //
         String secretKey = "myVerySecureSecretKeyThatIsAtLeast32Characters";
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails) { //token oluşturulur.
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -35,7 +35,7 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) { //Token geçerliliği kontrol
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }

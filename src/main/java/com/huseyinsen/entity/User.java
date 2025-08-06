@@ -41,11 +41,38 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return roles.stream()
+                .map(role -> (GrantedAuthority) role::getName) // Role'dan ismi GrantedAuthority olarak döndür
+                .toList();
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // veya user durumuna göre kontrol et
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return status != UserStatus.PENDING; // örnek kontrol
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return status == UserStatus.ACTIVE; // örnek kontrol
     }
 }

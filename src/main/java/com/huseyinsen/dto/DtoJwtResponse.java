@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DtoJwtResponse {
-    private String token;
+    private String accessToken;
     private String refreshToken;
-    private DtoUser userInfo;
+    private DtoUser dtoUser;
 }

@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DtoLoginRequest {
 
-    @NotBlank(message = "Email boş olamaz")
-    @Email(message = "Geçerli bir email adresi giriniz")
+    @NotBlank(message = "Invalid email format.")
+    @Email(message = "Please enter a valid email form.")
     private String email;
 
-    @NotBlank(message = "Şifre boş olamaz")
+    @NotBlank(message = "Password cannot be blank.")
     private String password;
 }

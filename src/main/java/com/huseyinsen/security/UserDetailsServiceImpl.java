@@ -1,8 +1,8 @@
-package com.huseyinsen.security.Impl;
+package com.huseyinsen.security;
 
 import com.huseyinsen.entity.User;
 import com.huseyinsen.repository.UserRepository;
-import com.huseyinsen.security.UserPrincipal;
+import com.huseyinsen.security.User.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,11 +16,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("Kullanıcı bulunamadı: " + username)
-                );
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
         return new UserPrincipal(user);
     }
 }

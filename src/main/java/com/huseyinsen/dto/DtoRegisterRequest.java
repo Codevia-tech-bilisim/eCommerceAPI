@@ -12,17 +12,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DtoRegisterRequest {
 
-    @NotBlank(message = "Email boş olamaz")
-    @Email(message = "Geçerli bir email adresi giriniz")
+    @NotBlank(message = "Email field can't be blank")
+    @Email(message = "Please enter a valid email!")
     private String email;
 
-    @NotBlank(message = "Şifre boş olamaz")
-    @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
+    @NotBlank(message = "Password field can't be blank")
+    @Size(min = 6, message = "The password must be minimum 6 characters!")
     private String password;
 
-    @NotBlank(message = "İsim boş olamaz")
+    @NotBlank(message = "Firstname field can't be blank")
     private String firstName;
 
-    @NotBlank(message = "Soyisim boş olamaz")
+    @NotBlank(message = "Lastname field can't be blank")
     private String lastName;
 }
