@@ -1,6 +1,8 @@
-import com.huseyinsen.dto.product.ProductFilter;
-import com.huseyinsen.dto.product.ProductRequest;
-import com.huseyinsen.dto.product.ProductResponse;
+package com.huseyinsen.service.Impl;
+
+import com.huseyinsen.dto.ProductFilter;
+import com.huseyinsen.dto.ProductRequest;
+import com.huseyinsen.dto.ProductResponse;
 import com.huseyinsen.entity.Category;
 import com.huseyinsen.entity.Product;
 import com.huseyinsen.entity.ProductStatus;
@@ -10,15 +12,17 @@ import com.huseyinsen.repository.ProductRepository;
 import com.huseyinsen.service.IProductService;
 import com.huseyinsen.specification.ProductSpecification;
 import com.huseyinsen.specification.SearchCriteria;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.query.Page;
-import org.springframework.cache.annotation.CacheEvict;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.List;
@@ -60,19 +64,6 @@ public class ProductServiceImpl implements IProductService {
         return modelMapper.map(saved, ProductResponse.class);
     }
 
-    @Override
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
-        Product product = productRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
-        modelMapper.map(request, product);
-        product.setCategory(category);
-        Product updated = productRepository.save(product);
-        return modelMapper.map(updated, ProductResponse.class);
-    }
 
     @Override
     public void deleteProduct(Long id) {
@@ -84,7 +75,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void reduceStock(Long productId, int quantity) {
+    public void reduceStock(Long productId, int quantity) throws BadRequestException {
         Product product = productRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         int updatedStock = product.getStockQuantity() - quantity;
@@ -113,53 +104,62 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Page<Product> searchProducts(ProductFilter filter, Pageable pageable) {
+    public Page<ProductResponse> searchProducts(String keyword, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         List<Specification<Product>> specs = new ArrayList<>();
 
-        if (filter.getMinPrice() != null) {
-            specs.add(new ProductSpecification(new SearchCriteria("price", ">=", filter.getMinPrice())));
+        if (minPrice != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("price", ">=", minPrice)));
         }
 
-        if (filter.getMaxPrice() != null) {
-            specs.add(new ProductSpecification(new SearchCriteria("price", "<=", filter.getMaxPrice())));
+        if (maxPrice != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("price", "<=", maxPrice)));
         }
 
-        if (filter.getCategoryId() != null) {
-            specs.add(new ProductSpecification(new SearchCriteria("category.id", ":", filter.getCategoryId())));
+        if (categoryId != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("category.id", ":", categoryId)));
         }
 
-        if (filter.getKeyword() != null && !filter.getKeyword().isEmpty()) {
-            specs.add(new ProductSpecification(new SearchCriteria("name", ":", filter.getKeyword())));
+        if (keyword != null && !keyword.isEmpty()) {
+            specs.add(new ProductSpecification(new SearchCriteria("name", ":", keyword)));
         }
 
         Specification<Product> resultSpec = specs.stream()
                 .reduce(Specification::and)
                 .orElse(null);
 
-        return productRepository.findAll(resultSpec, pageable);
+        Page<Product> productPage = productRepository.findAll(resultSpec, pageable);
+
+        // Entity -> DTO dönüşümü
+        return productPage.map(product -> modelMapper.map(product, ProductResponse.class));
     }
 
-    @Cacheable(value = "products", key = "#id")
-    public Product getProductById(Long id) {
-        System.out.println("DB'den veri alınıyor...");
-        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+    @Override
+    public ProductResponse updateProduct(Long id, @Valid ProductRequest request) {
+        Product product = productRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        // ModelMapper ile request'ten product'a güncelleme yap
+        modelMapper.map(request, product);
+
+        // İlişkiyi güncelle
+        product.setCategory(category);
+
+        Product updated = productRepository.save(product);
+        return modelMapper.map(updated, ProductResponse.class);
     }
 
-    @CacheEvict(value = "products", key = "#id")
-    public Product updateProduct(Long id, Product updatedProduct) {
-        Product product = productRepository.findById(id).orElseThrow();
-        // update işlemi
-        product.setName(updatedProduct.getName());
-        product.setPrice(updatedProduct.getPrice());
-        // ...
-        return productRepository.save(product); // DB ve cache ayrımı yok
+    @Override
+    public List<ProductResponse> searchByName(String keyword) {
+        Specification<Product> spec = new ProductSpecification(new SearchCriteria("name", ":", keyword));
+
+        List<Product> products = productRepository.findAll(spec);
+
+        return products.stream()
+                .map(product -> modelMapper.map(product, ProductResponse.class))
+                .toList();
     }
-
-    @CacheEvict(value = "products", key = "#id")
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
-    }
-
-
 
 }

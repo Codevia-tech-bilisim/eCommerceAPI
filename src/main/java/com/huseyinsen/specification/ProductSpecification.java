@@ -1,9 +1,16 @@
 package com.huseyinsen.specification;
 
+import com.huseyinsen.dto.ProductFilter;
 import com.huseyinsen.entity.Product;
-import com.huseyinsen.entity.Category;
-import jakarta.persistence.criteria.*;
+import com.huseyinsen.specification.SearchCriteria;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductSpecification implements Specification<Product> {
 
@@ -31,4 +38,30 @@ public class ProductSpecification implements Specification<Product> {
         }
         return null;
     }
+
+    // Statik build metodu
+    public static Specification<Product> build(ProductFilter filter) {
+        List<Specification<Product>> specs = new ArrayList<>();
+
+        if (filter.getMinPrice() != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("price", ">=", filter.getMinPrice())));
+        }
+        if (filter.getMaxPrice() != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("price", "<=", filter.getMaxPrice())));
+        }
+        if (filter.getCategoryId() != null) {
+            specs.add(new ProductSpecification(new SearchCriteria("category.id", ":", filter.getCategoryId())));
+        }
+        if (filter.getName() != null && !filter.getName().isEmpty()) {
+            specs.add(new ProductSpecification(new SearchCriteria("name", ":", filter.getName())));
+        }
+
+        Specification<Product> result = specs.stream()
+                .reduce(Specification::and)
+                .orElse(null);
+
+        return result;
+    }
+
+
 }

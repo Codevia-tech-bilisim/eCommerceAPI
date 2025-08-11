@@ -2,8 +2,7 @@ package com.huseyinsen.controller;
 
 import com.huseyinsen.dto.AuthenticationRequest;
 import com.huseyinsen.dto.AuthenticationResponse;
-import com.huseyinsen.dto.RegisterRequest;
-import com.huseyinsen.service.AuthenticationService;
+import com.huseyinsen.dto.DtoRegisterRequest;
 import com.huseyinsen.service.IAuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @Valid @RequestBody RegisterRequest request) {
+            @Valid @RequestBody DtoRegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 

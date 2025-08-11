@@ -1,4 +1,4 @@
-package com.huseyinsen.dto.product;
+package com.huseyinsen.dto;
 
 import com.huseyinsen.dto.category.CategoryResponse;
 import lombok.Builder;

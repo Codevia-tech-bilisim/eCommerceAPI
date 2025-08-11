@@ -1,15 +1,12 @@
 package com.huseyinsen.controller;
 
-import com.huseyinsen.dto.product.ProductRequest;
-import com.huseyinsen.dto.product.ProductResponse;
-import com.huseyinsen.service.ICategoryService;
+import com.huseyinsen.dto.ProductFilter;
+import com.huseyinsen.dto.ProductRequest;
+import com.huseyinsen.dto.ProductResponse;
 import com.huseyinsen.service.IFileStorageService;
 import com.huseyinsen.service.IProductService;
-import com.huseyinsen.service.Impl.AuthenticationService;
-import com.huseyinsen.service.Impl.FileStorageServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,11 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -51,8 +44,26 @@ public class ProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice) {
-        return ResponseEntity.ok(
-                productService.getAllProducts(page, size, sortBy, direction, name, categoryId, minPrice, maxPrice));
+
+        // Filtre nesnesini oluştur
+        ProductFilter filter = new ProductFilter();
+        filter.setName(name);
+        filter.setCategoryId(categoryId);
+        filter.setMinPrice(minPrice != null ? BigDecimal.valueOf(minPrice) : null);
+        filter.setMaxPrice(maxPrice != null ? BigDecimal.valueOf(maxPrice) : null);
+
+        // Sort objesi oluştur
+        Sort sort = direction.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        // Pageable nesnesi oluştur
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // Servis çağrısı
+        Page<ProductResponse> products = productService.getAllProducts(filter, pageable);
+
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")
@@ -90,7 +101,7 @@ public class ProductController {
         try {
             String storedFileName = fileStorageService.storeFile(imageFile);
 
-            productService.addImageToProduct(id, storedFileName);
+            productService.addImageToProduct(id, List.of(storedFileName));
 
             return ResponseEntity.ok("Image uploaded successfully: " + storedFileName);
 

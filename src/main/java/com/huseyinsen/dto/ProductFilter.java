@@ -1,4 +1,4 @@
-package com.huseyinsen.dto.product;
+package com.huseyinsen.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,4 +12,6 @@ public class ProductFilter {
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Long categoryId;
+    private String keyword;
+
 }

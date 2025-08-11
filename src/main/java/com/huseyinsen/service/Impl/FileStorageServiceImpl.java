@@ -67,6 +67,35 @@ public class FileStorageServiceImpl implements IFileStorageService {
         return Files.readAllBytes(filePath);
     }
 
+    @Override
+    public String storeFile(MultipartFile file) {
+        try {
+            // Dosya boyut kontrolü
+            if (file.getSize() > MAX_FILE_SIZE) {
+                throw new IOException("File size exceeds 5MB: " + file.getOriginalFilename());
+            }
+
+            // Uzantı kontrolü
+            String originalFilename = file.getOriginalFilename();
+            String extension = getFileExtension(originalFilename);
+            if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+                throw new IOException("Unsupported file type: " + originalFilename);
+            }
+
+            // Benzersiz dosya adı oluştur (productId olmadığı için sadece UUID)
+            String newFilename = UUID.randomUUID() + "." + extension;
+            Path filePath = storagePath.resolve(newFilename);
+
+            // Dosyayı kaydet
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return newFilename;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not store file " + file.getOriginalFilename(), e);
+        }
+    }
+
     private String getFileExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
             return "";

@@ -15,7 +15,6 @@ public interface IFileStorageService {
 
     // Dosya adından dosya içeriğini döner (opsiyonel)
     byte[] loadFileAsBytes(String filename) throws IOException;
-    public interface IFileStorageService {
-        String storeFile(MultipartFile file);
-    }
+
+    String storeFile(MultipartFile file);
 }

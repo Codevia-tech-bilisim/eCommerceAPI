@@ -1,4 +1,4 @@
-package com.huseyinsen.dto.product;
+package com.huseyinsen.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;

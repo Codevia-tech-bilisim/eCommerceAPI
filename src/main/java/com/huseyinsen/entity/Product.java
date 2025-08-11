@@ -31,7 +31,9 @@ public class Product {
 
     private Double weight;
 
-    private String dimensions; // Örn: "10x15x3 cm"
+    private String dimensions;
+
+    private boolean deleted;
 
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
