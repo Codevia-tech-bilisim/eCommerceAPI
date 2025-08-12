@@ -8,6 +8,24 @@ spring:
     password: 1
     driver-class-name: org.postgresql.Driver
 
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: your-email@example.com
+    password: your-email-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
   data:
     redis:
       host: localhost
@@ -36,3 +54,4 @@ management:
   endpoint:
     health:
       show-details: always
+

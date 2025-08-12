@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order Confirmation</title>
+</head>
+<body>
+<h1 th:text="'Hello, ' + ${customerName} + '!'"></h1>
+<p>Your order <strong th:text="${orderId}"></strong> has been confirmed.</p>
+</body>
+</html>

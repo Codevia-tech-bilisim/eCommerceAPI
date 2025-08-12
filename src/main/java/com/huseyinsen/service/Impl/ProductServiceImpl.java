@@ -141,10 +141,8 @@ public class ProductServiceImpl implements IProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        // ModelMapper ile request'ten product'a güncelleme yap
         modelMapper.map(request, product);
 
-        // İlişkiyi güncelle
         product.setCategory(category);
 
         Product updated = productRepository.save(product);
