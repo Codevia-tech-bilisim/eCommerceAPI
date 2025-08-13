@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
@@ -24,6 +24,18 @@ public class OrderServiceImpl {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
+
+    @Transactional
+    public void createOrderWithException(CreateOrderRequest request, String userEmail) {
+        // Normal order oluşturma logic (opsiyonel: veritabanına kaydet)
+        Order order = new Order();
+        order.setUser(userRepository.findByEmail(userEmail).orElseThrow());
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);
+
+        // Test için exception fırlat
+        throw new RuntimeException("Test exception: Transaction rollback kontrolü");
+    }
 
 
     public OrderResponse createOrder(CreateOrderRequest request, String userEmail) {

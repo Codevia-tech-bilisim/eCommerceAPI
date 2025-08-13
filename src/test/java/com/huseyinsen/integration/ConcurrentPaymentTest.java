@@ -1,12 +1,18 @@
 package com.huseyinsen.integration;
 
+import com.huseyinsen.entity.PaymentMethod;
+import com.huseyinsen.service.Impl.PaymentServiceImpl;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
 
 @SpringBootTest
 public class ConcurrentPaymentTest {
 
     @Autowired
-    private PaymentService paymentService;
+    private PaymentServiceImpl paymentService;
 
     @Test
     public void testConcurrentPayments() throws InterruptedException {

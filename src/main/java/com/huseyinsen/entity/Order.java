@@ -58,6 +58,17 @@ public class Order {
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
 
+    public void setShippingAddress(String addressLine) {
+        Address address = new Address();
+        address.setStreet(addressLine); // Address entity'ne göre uyarlayın
+        this.shippingAddress = address;
+    }
+
+    public void setBillingAddress(String addressLine) {
+        Address address = new Address();
+        address.setStreet(addressLine); // Address entity'ndeki alanlara göre doldur
+        this.billingAddress = address;
+    }
 
 
 }

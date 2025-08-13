@@ -68,4 +68,5 @@ public class PaymentServiceImpl implements IPaymentService {
                 .timestamp(LocalDateTime.now())
                 .build();
         paymentAuditRepository.save(log);
+    }
 }

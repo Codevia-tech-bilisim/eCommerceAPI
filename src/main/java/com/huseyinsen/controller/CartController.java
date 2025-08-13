@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.access.AccessDeniedException;
+
 @RequestMapping("")
 @RestController
 @RequiredArgsConstructor
@@ -32,14 +34,14 @@ public class CartController {
     @PutMapping("/api/cart/items/{itemId}")
     public ResponseEntity<Void> updateItem(@PathVariable Long itemId,
                                            @RequestBody UpdateCartItemRequest request,
-                                           @AuthenticationPrincipal UserDetails userDetails) {
+                                           @AuthenticationPrincipal UserDetails userDetails) throws java.nio.file.AccessDeniedException {
         cartService.updateItemQuantity(itemId, request.getQuantity(), userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/api/cart/items/{itemId}")
     public ResponseEntity<Void> removeItem(@PathVariable Long itemId,
-                                           @AuthenticationPrincipal UserDetails userDetails) {
+                                           @AuthenticationPrincipal UserDetails userDetails) throws java.nio.file.AccessDeniedException {
         cartService.removeItem(itemId, userDetails.getUsername());
         return ResponseEntity.ok().build();
     }

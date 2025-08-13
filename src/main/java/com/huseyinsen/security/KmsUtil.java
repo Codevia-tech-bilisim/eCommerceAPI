@@ -1,4 +1,5 @@
-// AWS SDK v2 örneği (pom / gradle ile aws-kms eklenmeli)
+package com.huseyinsen.security;// AWS SDK v2 örneği (pom / gradle ile aws-kms eklenmeli)
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.EncryptRequest;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;

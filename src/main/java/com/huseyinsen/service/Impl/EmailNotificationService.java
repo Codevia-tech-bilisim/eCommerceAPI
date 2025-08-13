@@ -1,13 +1,13 @@
-package com.huseyinsen.service.impl;
+package com.huseyinsen.service.Impl;
 
 import com.huseyinsen.service.INotificationService;
-import lombok.RequiredArgsConstructor;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.context.Context;
-
-import javax.mail.internet.MimeMessage;
+import org.thymeleaf.TemplateEngine;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -19,18 +19,25 @@ public class EmailNotificationService implements INotificationService {
     @Override
     public void sendEmail(String to, String subject, String templateName, Object model) {
         try {
+            // Thymeleaf context oluştur
             Context context = new Context();
             context.setVariables((java.util.Map<String, Object>) model);
 
+            // Template’i HTML’e çevir
             String htmlContent = templateEngine.process(templateName, context);
 
+            // MimeMessage oluştur
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            javax.mail.internet.MimeMessageHelper helper = new javax.mail.internet.MimeMessageHelper(mimeMessage, true);
+
+            // Helper ile alıcı, konu ve içerik set et
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
 
+            // Mail gönder
             mailSender.send(mimeMessage);
+
         } catch (Exception e) {
             throw new RuntimeException("Email gönderilemedi", e);
         }

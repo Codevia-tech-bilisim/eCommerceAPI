@@ -1,5 +1,6 @@
 package com.huseyinsen.controller;
 
+import com.huseyinsen.dto.ProcessPaymentRequest;
 import com.huseyinsen.entity.Payment;
 import com.huseyinsen.entity.PaymentMethod;
 import com.huseyinsen.service.IPaymentService;
@@ -36,7 +37,13 @@ public class PaymentController {
             throw new IllegalArgumentException("Kart tokeni (cardToken) zorunludur.");
         }
 
-        Payment payment = paymentService.processPayment(req);
+        PaymentMethod paymentMethod = PaymentMethod.valueOf(req.getMethod());
+        Payment payment = paymentService.processPayment(
+                req.getOrderId(),
+                req.getAmount(),
+                paymentMethod
+        );
+
         return ResponseEntity.ok(payment);
     }
 

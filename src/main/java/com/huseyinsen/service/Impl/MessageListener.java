@@ -1,6 +1,7 @@
 package com.huseyinsen.service.Impl;
 
 import com.huseyinsen.config.RabbitMQConfig;
+import com.huseyinsen.dto.MyMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 

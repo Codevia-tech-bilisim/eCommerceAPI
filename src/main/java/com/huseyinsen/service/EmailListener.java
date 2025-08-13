@@ -7,8 +7,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import javax.naming.Context;
+import org.thymeleaf.context.Context;
+
 
 @Service
 @RequiredArgsConstructor

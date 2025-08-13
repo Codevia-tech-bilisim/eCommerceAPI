@@ -1,5 +1,13 @@
 package com.huseyinsen.integration;
 
+import org.junit.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 @Testcontainers
 @SpringBootTest
 public class RabbitMQIntegrationTest {
