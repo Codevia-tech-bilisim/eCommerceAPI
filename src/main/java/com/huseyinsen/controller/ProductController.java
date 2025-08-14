@@ -90,10 +90,7 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
-        return ResponseEntity.ok(productService.searchByName(keyword));
-    }
+
 
     @PutMapping("/{id}/images")
     public ResponseEntity<?> uploadProductImage(@PathVariable Long id,

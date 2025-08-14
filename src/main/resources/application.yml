@@ -8,6 +8,9 @@ spring:
     password: 1
     driver-class-name: org.postgresql.Driver
 
+  thymeleaf:
+    enabled: false
+
 
   rabbitmq:
     host: localhost
@@ -54,4 +57,3 @@ management:
   endpoint:
     health:
       show-details: always
-

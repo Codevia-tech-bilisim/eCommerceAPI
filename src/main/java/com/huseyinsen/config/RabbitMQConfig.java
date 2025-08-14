@@ -1,17 +1,19 @@
 package com.huseyinsen.config;
 
-import com.rabbitmq.client.ConnectionFactory;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Queue;
 
 @Configuration
 public class RabbitMQConfig {
@@ -24,13 +26,13 @@ public class RabbitMQConfig {
     // Exchange
     @Bean
     public DirectExchange appExchange() {
-        return new DirectExchange(EXCHANGE_NAME);
+        return new DirectExchange(EXCHANGE_NAME, true, false);
     }
 
-    // Normal Queue
+    // Normal Queue (durable, auto-delete false)
     @Bean
     public Queue appQueue() {
-        return (Queue) QueueBuilder.durable(QUEUE_NAME)
+        return QueueBuilder.durable(QUEUE_NAME)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_NAME)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY + ".dlq")
                 .build();
@@ -39,26 +41,28 @@ public class RabbitMQConfig {
     // Dead Letter Queue
     @Bean
     public Queue deadLetterQueue() {
-        return (Queue) QueueBuilder.durable(DLQ_NAME).build();
+        return QueueBuilder.durable(DLQ_NAME).build();
     }
 
-    // Binding normal queue to exchange
+    // Binding normal queue
     @Bean
     public Binding appBinding(Queue appQueue, DirectExchange appExchange) {
         return BindingBuilder.bind(appQueue).to(appExchange).with(ROUTING_KEY);
     }
 
-    // Binding DLQ to exchange
+    // Binding DLQ
     @Bean
     public Binding dlqBinding(Queue deadLetterQueue, DirectExchange appExchange) {
         return BindingBuilder.bind(deadLetterQueue).to(appExchange).with(ROUTING_KEY + ".dlq");
     }
 
+    // Message Converter
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    // RabbitTemplate
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
@@ -66,39 +70,36 @@ public class RabbitMQConfig {
         return template;
     }
 
+    // Listener Factory with Retry
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jsonMessageConverter());
-
+        factory.setAutoStartup(true);
+        factory.setMissingQueuesFatal(false); // <- eksik olan ekleme
         factory.setAdviceChain(RetryInterceptorBuilder.stateless()
                 .maxAttempts(3)
                 .backOffOptions(1000, 2.0, 10000)
                 .recoverer(new RejectAndDontRequeueRecoverer())
                 .build());
-
         return factory;
     }
 
-
-    //E-mail queue
-
+    // Email Queue
     @Bean
     public Queue emailQueue() {
-        return new Queue("email.queue");
+        return QueueBuilder.durable("email.queue").build();
     }
 
     @Bean
     public DirectExchange emailExchange() {
-        return new DirectExchange("email.exchange");
+        return new DirectExchange("email.exchange", true, false);
     }
 
     @Bean
     public Binding emailBinding(Queue emailQueue, DirectExchange emailExchange) {
         return BindingBuilder.bind(emailQueue).to(emailExchange).with("email.routing.key");
     }
-
-
 
 }

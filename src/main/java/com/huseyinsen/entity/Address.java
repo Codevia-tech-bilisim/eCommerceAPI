@@ -5,6 +5,7 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "addresses")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,4 +20,8 @@ public class Address {
     private String state;
     private String zipCode;
     private String country;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id") // Foreign key
+    private User user;
 }
